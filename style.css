@@ -12,7 +12,6 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-
 }
 
 @font-face {
@@ -29,7 +28,6 @@ p {
 
 main img, video {
     width: 120%;
-    max-width: 800px;
     border-radius: 16px;
     margin: 12px auto 37px;
     position: relative;
@@ -53,7 +51,7 @@ h1, h2, section {
 }
 
 h1 {
-    font-size: 3rem; /* Use relative size units to adapt to different screen sizes */
+    font-size: 3rem;
     max-width: 650px;
     text-align: center;
 }
@@ -64,13 +62,22 @@ h2 {
     margin-bottom: 20px;
 }
 
-li {
-    width: 90%;
-    max-width: 600px;
-    margin-left: 10px;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
+ul {
+    padding-left: 1.5rem; 
+    list-style-position: outside;
+    margin: 0;
 }
+
+li {
+    margin-bottom: 10px;
+    padding-left: 0; 
+    list-style-position: outside; 
+    max-width: 90%; 
+    font-size: 1.2rem;
+    display: list-item;
+    text-align: left;
+}
+
 
 section {
     width: 90%;
@@ -143,21 +150,33 @@ footer {
     align-items: flex-start;
 }
 
+.wide_photo {
+    width: 140%;
+    left: -20%;
+}
+    
+
 @media screen and (max-width: 768px) {
     body {
-        font-size: 4vw; /* Adjust font size for smaller screens */
+        font-size: 4vw;
     }
 
     h1 {
-        font-size: 8vw; /* Adjust header size for smaller screens */
+        font-size: 8vw;
     }
 
     h2 {
-        font-size: 6vw; /* Adjust subheader size for smaller screens */
+        font-size: 8vw;
+    }
+    
+    ul {
+        padding-left: 1rem; /* Adjust bullet spacing for smaller screens */
     }
 
     li {
-        font-size: 5vw; /* Adjust list item font size for smaller screens */
+        padding-left: 1rem; /* Add padding to align text correctly */
+        list-style-position: outside; /* Maintain bullet position */
+        max-width: 100%; /* Make sure it fits the screen */
     }
 
     main img, video {
@@ -170,12 +189,17 @@ footer {
         width: 100%;
         max-width: 100%;
         left: 0;
-        padding-top: 56.25%; /* Keep the aspect ratio */
+        padding-top: 56.25%;
     }
 
     .image-container img {
         width: 100%;
         object-fit: cover;
+    }
+
+    .wide_photo {
+        width: 100%;
+        left: 0;
     }
 }
 
