@@ -12,6 +12,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    height: 100%;
 }
 
 @font-face {
@@ -42,6 +43,7 @@ main {
     margin-left: auto;
     margin-right: auto;
     text-align: left;
+    height: 100%;
 }
 
 h1, h2, section {
