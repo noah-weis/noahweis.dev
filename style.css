@@ -156,13 +156,11 @@ footer {
     width: 140%;
     left: -20%;
 }
-
-.safe-area { }
     
 
 @media screen and (max-width: 768px) {
     body {
-        font-size: 4vw;
+        font-size: 6vw;
     }
 
     h1 {
@@ -181,6 +179,7 @@ footer {
         padding-left: 1rem; /* Add padding to align text correctly */
         list-style-position: outside; /* Maintain bullet position */
         max-width: 100%; /* Make sure it fits the screen */
+        font-size: 6vw;
     }
 
     main img, video {
@@ -204,12 +203,6 @@ footer {
     .wide_photo {
         width: 100%;
         left: 0;
-    }
-
-    .safe-area {
-        height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-top: env(safe-area-inset-top);
     }
 }
 
