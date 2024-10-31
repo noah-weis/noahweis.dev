@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FizzBuzz Checker</title>
+</head>
+<body>
+  <h1>FizzBuzz Checker</h1>
+  <label for="number">Enter a number:</label>
+  <input type="number" id="number" onkeydown="if(event.key === 'Enter') checkFizzBuzz()">
+  <button onclick="checkFizzBuzz()">Check</button>
+  <p id="result"></p>
+
+  <script>
+    function checkFizzBuzz() {
+      const numberInput = document.getElementById('number');
+      const num = parseInt(numberInput.value);
+      let result;
+
+      if (isNaN(num)) {
+        result = "Please enter a valid number.";
+      } else if (num % 3 === 0 && num % 5 === 0) {
+        result = "FizzBuzz";
+      } else if (num % 3 === 0) {
+        result = "Fizz";
+      } else if (num % 5 === 0) {
+        result = "Buzz";
+      } else {
+        result = num;
+      }
+
+      document.getElementById('result').innerText = result;
+      numberInput.value = ''; 
+    }
+  </script>
+</body>
+</html>
