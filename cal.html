@@ -20,7 +20,6 @@
     <!-- Load the Google API client library -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
-      // These keys are restricted to your domain.
       const API_KEY = 'AIzaSyDGS22dQreivEt5r19817N2NN1AcqgWazw';
       const CLIENT_ID = "356409790785-mtc6hrb25im8i6a1pslper5j51govpp8.apps.googleusercontent.com";
       const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
@@ -38,42 +37,29 @@
           });
       }
 
-      // Request an access token using the new GIS library.
-      function requestAccessToken() {
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-      }
-
-      // Once the window loads, initialize the gapi client and the GIS token client.
-      window.onload = function() {
-        initGapiClient().then(() => {
-          // Initialize the token client from the new GIS library.
-          tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: (tokenResponse) => {
-              if (tokenResponse.error) {
-                console.error("Error obtaining access token", tokenResponse);
-                document.getElementById('output').innerHTML = 'Error obtaining access token.';
-                return;
-              }
-              // Set the access token for gapi client.
-              gapi.client.setToken({ access_token: tokenResponse.access_token });
-              // Now query the free/busy information.
-              queryFreeBusy();
+      // Initialize the GIS token client.
+      function initializeTokenClient() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: (tokenResponse) => {
+            if (tokenResponse.error) {
+              console.error("Error obtaining access token", tokenResponse);
+              document.getElementById('output').innerHTML = 'Error obtaining access token.';
+              return;
             }
-          });
-          // Automatically request the access token.
-          requestAccessToken();
+            // Set the access token for the gapi client.
+            gapi.client.setToken({ access_token: tokenResponse.access_token });
+            queryFreeBusy();
+          }
         });
-      };
+      }
 
       // Query the Google Calendar freebusy endpoint.
       function queryFreeBusy() {
-        // Define a time window (for example, the next 24 hours).
         const now = new Date();
         const tomorrow = new Date(now);
         tomorrow.setDate(now.getDate() + 1);
-
         const requestBody = {
           timeMin: now.toISOString(),
           timeMax: tomorrow.toISOString(),
@@ -83,7 +69,6 @@
         gapi.client.calendar.freebusy.query(requestBody).then(response => {
           const busyTimes = response.result.calendars.primary.busy;
           const outputDiv = document.getElementById('output');
-
           if (!busyTimes || busyTimes.length === 0) {
             outputDiv.innerHTML = '<p>You are free all day!</p>';
           } else {
@@ -103,6 +88,17 @@
           console.error('Freebusy query error:', error);
         });
       }
+
+      // Ensure both the gapi client and GIS token client are initialized on window load.
+      window.onload = function() {
+        gapi.load('client', () => {
+          initGapiClient().then(() => {
+            initializeTokenClient();
+            // Request an access token. The prompt is set to 'consent' to ensure the user is prompted.
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+          });
+        });
+      };
     </script>
   </body>
 </html>
