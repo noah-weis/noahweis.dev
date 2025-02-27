@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Calandar Availability</title>
+    <!-- Prevent search engines from indexing this page -->
+    <meta name="robots" content="noindex">
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+      h1 { text-align: center; }
+      .busy { background-color: #ffcccc; padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>My Calendar Availability</h1>
+    <div id="output">Loading your availability...</div>
+
+    <!-- Load the Google API client library -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+    // Don't worry, these keys are restricted to this domain. Nice try though.
+      const API_KEY = 'AIzaSyDGS22dQreivEt5r19817N2NN1AcqgWazw';
+      const CLIENT_ID = "356409790785-mtc6hrb25im8i6a1pslper5j51govpp8.apps.googleusercontent.com";
+      const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+      const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+      // Initialize the API client library and set up sign-in state listeners.
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(() => {
+          // Listen for sign-in state changes.
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          // Handle the initial sign-in state.
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+        }, error => {
+          document.getElementById('output').innerHTML = 'Error initializing Google API client.';
+          console.error(JSON.stringify(error, null, 2));
+        });
+      }
+
+      // Called when the signed in status changes.
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          queryFreeBusy();
+        } else {
+          // Prompt the user to sign in if they are not already.
+          gapi.auth2.getAuthInstance().signIn();
+        }
+      }
+
+      // Query the Google Calendar freebusy endpoint.
+      function queryFreeBusy() {
+        // Define a time window (for example, the next 24 hours).
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+
+        const requestBody = {
+          timeMin: now.toISOString(),
+          timeMax: tomorrow.toISOString(),
+          items: [{ id: 'primary' }]
+        };
+
+        gapi.client.calendar.freebusy.query(requestBody).then(response => {
+          const busyTimes = response.result.calendars.primary.busy;
+          const outputDiv = document.getElementById('output');
+
+          if (!busyTimes || busyTimes.length === 0) {
+            outputDiv.innerHTML = '<p>You are free all day!</p>';
+          } else {
+            let html = '<h2>Busy Periods:</h2>';
+            busyTimes.forEach(period => {
+              const start = new Date(period.start);
+              const end = new Date(period.end);
+              html += `<div class="busy">
+                         Busy from ${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                         to ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                       </div>`;
+            });
+            outputDiv.innerHTML = html;
+          }
+        }, error => {
+          document.getElementById('output').innerHTML = 'Error fetching calendar data.';
+          console.error('Freebusy query error:', error);
+        });
+      }
+
+      // Load the API client library and initialize it.
+      gapi.load('client:auth2', initClient);
+    </script>
+  </body>
+</html>
