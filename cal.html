@@ -1,104 +1,31 @@
+<!-- cal.html -->
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Calandar Availability</title>
-    <!-- Prevent search engines from indexing this page -->
-    <meta name="robots" content="noindex">
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
-      h1 { text-align: center; }
-      .busy { background-color: #ffcccc; padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; }
-    </style>
-  </head>
-  <body>
-    <h1>My Calendar Availability</h1>
-    <div id="output">Loading your availability...</div>
-
-    <!-- Load the new Google Identity Services library -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Load the Google API client library -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-      const API_KEY = 'AIzaSyDGS22dQreivEt5r19817N2NN1AcqgWazw';
-      const CLIENT_ID = "356409790785-mtc6hrb25im8i6a1pslper5j51govpp8.apps.googleusercontent.com";
-      const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
-      let tokenClient;
-
-      // Initialize the gapi client library and load the Calendar API.
-      function initGapiClient() {
-        gapi.client.setApiKey(API_KEY);
-        return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/calendar/v3/rest")
-          .then(() => {
-            console.log("GAPI client loaded for Calendar API");
-          }, (err) => {
-            console.error("Error loading GAPI client for Calendar API", err);
-            document.getElementById('output').innerHTML = 'Error loading Calendar API.';
-          });
-      }
-
-      // Initialize the GIS token client.
-      function initializeTokenClient() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: (tokenResponse) => {
-            if (tokenResponse.error) {
-              console.error("Error obtaining access token", tokenResponse);
-              document.getElementById('output').innerHTML = 'Error obtaining access token.';
-              return;
-            }
-            // Set the access token for the gapi client.
-            gapi.client.setToken({ access_token: tokenResponse.access_token });
-            queryFreeBusy();
-          }
-        });
-      }
-
-      // Query the Google Calendar freebusy endpoint.
-      function queryFreeBusy() {
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(now.getDate() + 1);
-        const requestBody = {
-          timeMin: now.toISOString(),
-          timeMax: tomorrow.toISOString(),
-          items: [{ id: 'primary' }]
-        };
-
-        gapi.client.calendar.freebusy.query(requestBody).then(response => {
-          const busyTimes = response.result.calendars.primary.busy;
-          const outputDiv = document.getElementById('output');
-          if (!busyTimes || busyTimes.length === 0) {
-            outputDiv.innerHTML = '<p>You are free all day!</p>';
-          } else {
-            let html = '<h2>Busy Periods:</h2>';
-            busyTimes.forEach(period => {
-              const start = new Date(period.start);
-              const end = new Date(period.end);
-              html += `<div class="busy">
-                         Busy from ${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
-                         to ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                       </div>`;
-            });
-            outputDiv.innerHTML = html;
-          }
-        }, error => {
-          document.getElementById('output').innerHTML = 'Error fetching calendar data.';
-          console.error('Freebusy query error:', error);
-        });
-      }
-
-      // Ensure both the gapi client and GIS token client are initialized on window load.
-      window.onload = function() {
-        gapi.load('client', () => {
-          initGapiClient().then(() => {
-            initializeTokenClient();
-            // Request an access token. The prompt is set to 'consent' to ensure the user is prompted.
-            tokenClient.requestAccessToken({ prompt: 'consent' });
-          });
-        });
-      };
-    </script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar | Noah Weis | Leet Club</title>
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header></header>
+  <main class="fade-in-text">
+    <h1><a href="/" style="text-decoration: none; color: inherit;">My Availability</a></h1>
+    
+    <p>Below is my free/busy schedule for the week. Times are shown in Pacific Time.</p>
+    
+    <iframe 
+      src="https://calendar.google.com/calendar/embed?src=b374b6b5f1279878109eae4a597f227e1baf1b6247cc6b9bf6c2ee68f3b12ac7%40group.calendar.google.com&amp;src=e82c77615f7f8732389c6b4006bb0d0cb07e526194cc4f068376cf83ffad5331%40group.calendar.google.com&amp;src=08f4a1f7d8e33a9d38937ce85c537f6d79afc3e7e62d93510d9ad3f300a8781b%40group.calendar.google.com&amp;ctz=America%2FLos_Angeles&amp;mode=WEEK"
+      style="border: 0; width: 100%; min-height: 600px;" 
+      frameborder="0" 
+      scrolling="no">
+    </iframe>
+    
+    <p style="margin-top: 30px; width: 100%; display: flex; justify-content: space-between;">
+      <a href="/" style="color: inherit; font-weight: normal;">&larr; Back to home</a>
+    </p>
+  </main>
+  <footer></footer>
+</body>
 </html>
