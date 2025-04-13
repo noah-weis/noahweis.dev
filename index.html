@@ -8,18 +8,83 @@
     <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <main class="fade-in-text left-aligned" style="padding-top: 20px; padding-bottom: 50px;">
-        <section>My name is <a href=about>Noah</a>, I am a software engineer.</section>
+    <main class="landing-page fade-in-text">
+        <div class="landing-content">
+            <img src="assets/img/qhw25_edit.jpg" alt="Noah Weis" class="landing-image" style="top: 80px;">
+            <h1>Noah Weis</h1>
+            <p class="landing-description">Software engineer with proven teamwork and leadership experience.</p>
+        </div>
 
-        <section>I am currently studying <a href=education>Computer Science</a> at the University of Oregon.</section>
-                
-        <section>I'm the event director for <a href="https://www.quackhacks.org/" target="_blank">QuackHacks</a>, UO's premier hackathon.</section>
-        
-        <section>I work for the <a href=student_work>CS Department</a>, I help students and showcase our program.</section>
-        
-        <section>I automated a data trasfer and recruited for <a href=gotjunk>1-800-GOT-JUNK?</a>.</section>
-        
-        <section>In my free time, I am developing a <a href=https://github.com/noah-weis/ChessBot target="_blank">chess engine</a> and <a href=https://github.com/noah-weis/noahweis.dev target="_blank">this website</a>.</section>
+        <section class="experiences-section">
+            <h1>Work</h1>
+            
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h2><a href="pipeworks.html">Pipeworks Studios</a></h2>
+                    <span class="date">2025 - Present</span>
+                </div>
+                <div class="role">Game Engineering Intern</div>
+                <div class="location">Eugene, OR</div>
+            </div>
+            
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h2><a href="quackhacks.html">QuackHacks</a></h2>
+                    <span class="date">2024 - Present</span>
+                </div>
+                <div class="role">Event Director / Founder</div>
+                <div class="location">Eugene, OR</div>
+            </div>
+
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h2><a href="dermoai.html">DermoAI</a></h2>
+                    <span class="date">2025</span>
+                </div>
+                <div class="role">Winner of BeaverHacks 2025 Best Overall Presented by NVIDIA</div>
+                <div class="location">Hackathon Project Member, UI/UX & Frontend Lead</div>
+            </div>
+
+            <div class="experience-item">
+                <div class="experience-header">
+                    <h2><a href="education.html">University of Oregon</a></h2>
+                    <span class="date">June 2027</span>
+                </div>
+                <div class="role">M.S. Computer Science</div>
+                <div class="location">Eugene, OR</div>
+            </div>
+
+            
+        </section>
     </main>
+    <div class="arrow-down arrow-hidden">↓</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const arrow = document.querySelector('.arrow-down');
+            
+            // Show arrow after 2.5 seconds
+            setTimeout(() => {
+                arrow.classList.remove('arrow-hidden');
+            }, 2500);
+
+            // Hide arrow when user scrolls
+            window.addEventListener('scroll', () => {
+                arrow.classList.add('arrow-hidden');
+            });
+
+            // Calculate the height of the landing content and adjust the experiences section position
+            const landingContent = document.querySelector('.landing-content');
+            const experiencesSection = document.querySelector('.experiences-section');
+            
+            if (landingContent && experiencesSection) {
+                const landingContentHeight = landingContent.offsetHeight;
+                const topSpacing = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-spacing'));
+                const viewportHeight = window.innerHeight;
+                
+                experiencesSection.style.marginTop = `${viewportHeight - topSpacing - landingContentHeight - 140}px`;
+            }
+        });
+    </script>
 </body>
 </html>
