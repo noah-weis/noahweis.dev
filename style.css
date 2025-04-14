@@ -210,53 +210,12 @@ footer {
     margin-bottom: 3rem;
 }
 
-.project-item {
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.project-item:last-child {
-    border-bottom: none;
-}
-
-.project-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.5rem;
-}
-
-.project-header h2 {
-    margin: 0;
-    font-size: 2rem;
-    color: var(--text-color);
-}
-
-.project-links {
-    margin-top: 1rem;
-}
-
-.project-link {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background-color: var(--link-color);
-    color: var(--background-color);
-    border-radius: 4px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.project-link:hover {
-    background-color: #c6d89a;
-    text-decoration: none;
-}
-
 .experience-header {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 0.5rem;
+    width: 100%;
 }
 
 .experience-header h2 {
@@ -270,13 +229,13 @@ footer {
     color: var(--text-color);
 }
 
-.role {
+.about {
     font-size: 1.5rem;
     color: var(--text-color);
     margin-bottom: 0.25rem;
 }
 
-.location {
+.role {
     font-size: 1.2rem;
     font-style: italic;
     color: var(--text-color);
@@ -357,6 +316,19 @@ footer {
         width: 40%;
         left: 0;
     }
+
+    .experience-content {
+        flex-direction: column;
+    }
+    
+    .experience-image {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 1.5rem 0 0 0 !important;
+        left: 0 !important;
+        position: relative !important;
+        margin-left: 0 !important;
+    }
 }
 
 @keyframes fadeIn {
@@ -391,4 +363,24 @@ footer {
 
 .arrow-hidden {
     opacity: 0;
+}
+
+.experience-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-top: 1rem;
+    justify-content: space-between;
+}
+
+.text-content {
+    flex: 1;
+}
+
+.experience-image {
+    width: 40%;
+    margin: 0;
+    border-radius: 16px;
+    margin-left: auto;
+    position: inherit;
 }
