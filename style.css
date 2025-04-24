@@ -365,6 +365,32 @@ footer {
         position: relative !important;
         margin-left: 0 !important;
     }
+
+    .skills {
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        color: var(--text-color);
+        opacity: 0.8;
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    
+    .skills > * {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .skills img {
+        width: auto !important;
+        height: 2em !important;
+        vertical-align: middle;
+        position: static !important;
+        left: 0 !important;
+        margin: 0 !important;
+    }
+    
 }
 
 @keyframes fadeIn {
