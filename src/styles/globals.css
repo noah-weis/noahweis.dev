@@ -1,0 +1,70 @@
+:root {
+  --background-color: #1c351c;
+  --text-color: #eaf5fc;
+  --link-color: #84c2e2;
+  --red-color: #c6d89a;
+  --top-spacing: 0rem;
+  --section-spacing: 5vh;
+  --landing-bottom-spacing: 0rem;
+}
+
+@media screen and (orientation: landscape) {
+  :root { --top-spacing: 10rem; }
+}
+
+@media screen and (orientation: portrait) {
+  :root { --top-spacing: 8rem; }
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("/assets/fonts/SF-Pro-Display-Regular.otf");
+  font-display: swap;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 30px;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  height: 100%;
+  padding-top: 0;
+}
+
+a, a:link, a:visited {
+  color: var(--link-color);
+  transition: color 0.3s ease;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--red-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.fade-in-text {
+  animation: fadeIn 3s;
+}
+
+@media screen and (max-width: 768px) {
+  body { font-size: 6vw; }
+}
