@@ -1,2 +1,31 @@
-.*
-!.gitignore 
+node_modules
+dist
+dist-ssr
+*.tsbuildinfo
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/tests/artifacts/
