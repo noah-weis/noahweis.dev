@@ -21,6 +21,8 @@ npm-debug.log*
 
 # OS
 .DS_Store
+Thumbs.db
+desktop.ini
 
 # Playwright
 /test-results/
