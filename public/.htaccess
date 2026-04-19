@@ -1,0 +1,8 @@
+# SPA fallback: route all non-file requests to index.html
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Permanent redirect for the legacy cal URL
+Redirect 301 /cal.html /cal
