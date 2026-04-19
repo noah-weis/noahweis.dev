@@ -11,6 +11,8 @@
   border-radius: 16px;
   filter: grayscale(100%);
   align-self: flex-end;
+  position: relative;
+  top: 80px;
 }
 
 .name {
