@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-ssr
+.vite
 *.tsbuildinfo
 *.local
 
@@ -29,3 +30,6 @@ desktop.ini
 /playwright-report/
 /playwright/.cache/
 /tests/artifacts/
+
+# Local-only helper scripts (contain host-specific values)
+/scripts/
