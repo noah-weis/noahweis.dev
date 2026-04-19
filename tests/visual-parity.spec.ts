@@ -51,9 +51,14 @@ test("home: scroll arrow appears after 2.5s and hides on scroll", async ({ page 
   await page.waitForLoadState("load");
   const arrow = page.locator("[data-testid='scroll-arrow']");
   await expect(arrow).toHaveCSS("opacity", "0");
-  await page.waitForTimeout(2700);
-  const opacity = await arrow.evaluate((el) => getComputedStyle(el).opacity);
-  expect(parseFloat(opacity)).toBeGreaterThan(0.5);
+  // Arrow sets visible=true at 2500ms, then CSS transition fades opacity 0 → 0.7 over 500ms.
+  // Poll so slow machines/runners don't race the fade-in.
+  await expect
+    .poll(
+      () => arrow.evaluate((el) => parseFloat(getComputedStyle(el).opacity)),
+      { timeout: 5000, intervals: [100, 200, 500] },
+    )
+    .toBeGreaterThan(0.5);
   await page.mouse.wheel(0, 300);
   await page.waitForTimeout(600);
   await expect(arrow).toHaveCSS("opacity", "0");
