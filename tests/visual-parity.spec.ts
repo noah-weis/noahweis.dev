@@ -21,7 +21,8 @@ for (const route of routes) {
     const viewport = testInfo.project.name;
 
     await page.goto(`${LEGACY}${route.legacy}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForLoadState("load");
     await page.waitForTimeout(3500);
     const legacyShot = await page.screenshot({ fullPage: true });
     fs.writeFileSync(
@@ -30,7 +31,8 @@ for (const route of routes) {
     );
 
     await page.goto(`${NEW}${route.next}`);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForLoadState("load");
     await page.waitForTimeout(3500);
     const newShot = await page.screenshot({ fullPage: true });
     fs.writeFileSync(
@@ -45,7 +47,8 @@ for (const route of routes) {
 
 test("home: scroll arrow appears after 2.5s and hides on scroll", async ({ page }) => {
   await page.goto(`${NEW}/`);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("load");
   const arrow = page.locator("[data-testid='scroll-arrow']");
   await expect(arrow).toHaveCSS("opacity", "0");
   await page.waitForTimeout(2700);
@@ -59,7 +62,8 @@ test("home: scroll arrow appears after 2.5s and hides on scroll", async ({ page 
 test("home: clicking email copies to clipboard", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto(`${NEW}/`);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("load");
   await page.locator("[data-testid='copy-email']").click();
   const clip = await page.evaluate(() => navigator.clipboard.readText());
   expect(clip).toBe("njdweis@gmail.com");
@@ -67,7 +71,8 @@ test("home: clicking email copies to clipboard", async ({ page, context }) => {
 
 test("cal: has noindex meta tag and iframe", async ({ page }) => {
   await page.goto(`${NEW}/cal`);
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("load");
   const meta = page.locator('meta[name="robots"]');
   await expect(meta).toHaveAttribute("content", /noindex/);
   await expect(page.locator("iframe")).toBeVisible();
