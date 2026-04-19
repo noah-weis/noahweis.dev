@@ -4,6 +4,7 @@ dist-ssr
 .vite
 *.tsbuildinfo
 *.local
+.worktrees/
 
 # Logs
 logs
