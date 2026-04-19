@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test:baseline": "playwright test --project=desktop --grep screenshots",
+    "serve:legacy": "serve legacy -p 4173 -L"
   },
   "dependencies": {
     "react": "^18.3.1",
