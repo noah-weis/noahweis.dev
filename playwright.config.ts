@@ -22,16 +22,9 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 } },
     },
   ],
-  webServer: [
-    {
-      command: "npx serve legacy -p 4173 -L",
-      port: 4173,
-      reuseExistingServer: true,
-    },
-    {
-      command: "npm run dev -- --port 5173 --strictPort",
-      port: 5173,
-      reuseExistingServer: true,
-    },
-  ],
+  webServer: {
+    command: "npm run dev -- --port 5173 --strictPort",
+    port: 5173,
+    reuseExistingServer: true,
+  },
 });
