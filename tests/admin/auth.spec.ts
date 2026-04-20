@@ -1,6 +1,6 @@
 import { test, expect } from "../fixtures/supabase";
 
-test.beforeEach(async ({ resetDb, service }) => {
+test.beforeAll(async ({ resetDb, service }) => {
   test.setTimeout(120_000);
   await Promise.all([
     resetDb(),
@@ -10,6 +10,21 @@ test.beforeEach(async ({ resetDb, service }) => {
     ]),
   ]);
 });
+
+// These tests exercise the login form itself, so they use the real OTP flow.
+async function signInViaForm(page: any, service: any, email: string) {
+  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email });
+  const otp = link!.properties.email_otp!;
+  await page.route("**/functions/v1/request-otp", (route: any) =>
+    route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) })
+  );
+  await page.goto("http://localhost:5173/admin");
+  await page.getByTestId("login-email-input").fill(email);
+  await page.getByTestId("login-send-code").click();
+  await page.getByTestId("login-code-input").fill(otp);
+  await page.getByTestId("login-verify").click();
+  await page.waitForURL("**/admin/dashboard");
+}
 
 test("login: email step shows then advances to code step on submit", async ({ page }) => {
   await page.goto("http://localhost:5173/admin");
@@ -29,18 +44,7 @@ test("login: invalid email shape shows inline error and stays on email step", as
 });
 
 test("login: correct OTP signs in and redirects to dashboard", async ({ page, service }) => {
-  // Generate the OTP server-side so we don't need an email inbox.
-  // Stub the edge-function call so it doesn't overwrite the generated OTP.
-  await page.route("**/functions/v1/request-otp", route => route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) }));
-  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "admin@example.com" });
-  const otp = link!.properties.email_otp!;
-
-  await page.goto("http://localhost:5173/admin");
-  await page.getByTestId("login-email-input").fill("admin@example.com");
-  await page.getByTestId("login-send-code").click();
-  await page.getByTestId("login-code-input").fill(otp);
-  await page.getByTestId("login-verify").click();
-  await page.waitForURL("**/admin/dashboard");
+  await signInViaForm(page, service, "admin@example.com");
   await expect(page.getByTestId("dashboard-root")).toBeVisible();
 });
 
@@ -55,18 +59,7 @@ test("login: wrong OTP shows error and stays on code step", async ({ page }) => 
 });
 
 test("login: signed-in user visiting /admin is bounced to /admin/dashboard", async ({ page, service }) => {
-  // Stub the edge-function call so it doesn't overwrite the generated OTP.
-  await page.route("**/functions/v1/request-otp", route => route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) }));
-  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "admin@example.com" });
-  const otp = link!.properties.email_otp!;
-  await page.goto("http://localhost:5173/admin");
-  await page.getByTestId("login-email-input").fill("admin@example.com");
-  await page.getByTestId("login-send-code").click();
-  await page.getByTestId("login-code-input").fill(otp);
-  await page.getByTestId("login-verify").click();
-  await page.waitForURL("**/admin/dashboard");
-
-  // Reload /admin — should be bounced back to /admin/dashboard.
+  await signInViaForm(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin");
   await page.waitForURL("**/admin/dashboard");
 });
@@ -78,19 +71,8 @@ test("admin: signed-out user visiting /admin/dashboard is redirected to /admin",
 });
 
 test("admin: top bar shows current email and sign-out works", async ({ page, service }) => {
-  await page.route("**/functions/v1/request-otp", (route) =>
-    route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) })
-  );
-  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "admin@example.com" });
-  const otp = link!.properties.email_otp!;
-  await page.goto("http://localhost:5173/admin");
-  await page.getByTestId("login-email-input").fill("admin@example.com");
-  await page.getByTestId("login-send-code").click();
-  await page.getByTestId("login-code-input").fill(otp);
-  await page.getByTestId("login-verify").click();
-  await page.waitForURL("**/admin/dashboard");
+  await signInViaForm(page, service, "admin@example.com");
   await expect(page.getByTestId("admin-topbar-email")).toHaveText("admin@example.com");
-
   await page.getByTestId("admin-topbar-signout").click();
   await page.waitForURL("**/admin");
 });
