@@ -116,7 +116,7 @@ Create `D:/vibes/noahweis.dev/.env.local.example`:
 # Local Supabase stack values printed by `supabase start`. Production values come from
 # the Supabase dashboard for the deployed project.
 VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJI... (from `supabase start` output)
+VITE_SUPABASE_ANON_KEY=replace-with-anon-key-from-supabase-start-output
 ```
 
 - [ ] **Step 6: Add Vite env types**
