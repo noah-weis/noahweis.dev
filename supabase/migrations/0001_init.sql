@@ -33,7 +33,9 @@ create index events_event_name_idx  on events (event_name);
 -- Trigger: keep allowed_emails.last_sign_in_at in sync with sign-in events,
 -- so the client never needs update permission on allowed_emails.
 create or replace function bump_last_sign_in() returns trigger
-language plpgsql security definer as $$
+language plpgsql security definer
+set search_path = public, pg_temp
+as $$
 begin
   if new.event_name = 'signed_in' and new.email is not null then
     update allowed_emails

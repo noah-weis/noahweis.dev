@@ -29,12 +29,17 @@ export const test = base.extend<SupaFixtures>({
   resetDb: async ({}, use) => {
     use(() => {
       try {
-        execSync("supabase db reset --no-seed", { stdio: "inherit" });
-      } catch (err) {
-        // On Windows/Docker Desktop the storage health-check can return 502 after
-        // container restart even though the migration applied successfully.
-        // Log the error but don't fail the test suite — the DB is usable.
-        console.warn("supabase db reset exited non-zero (likely storage health-check on Windows); continuing.");
+        execSync("supabase db reset --no-seed", { stdio: ["ignore", "inherit", "pipe"] });
+      } catch (err: unknown) {
+        const stderr = (err as { stderr?: Buffer }).stderr?.toString() ?? "";
+        // Supabase CLI v2.90 + Docker Desktop on Windows emits a 502 from the
+        // storage health check after container restart. The migration itself
+        // applied successfully; this is a spurious error.
+        if (stderr.includes("storage") && stderr.includes("502")) {
+          console.warn("[resetDb] Ignoring known storage-502 health-check quirk on Windows.");
+          return;
+        }
+        throw err; // Real failure — let Playwright abort the suite.
       }
     });
   },
