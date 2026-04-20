@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import type { Json } from "./types.generated";
 
 export async function logEvent(
   eventName: string,
@@ -12,7 +13,7 @@ export async function logEvent(
       email: session.user.email,
       app_slug: appSlug ?? null,
       event_name: eventName,
-      payload,
+      payload: payload as Json,
     });
   } catch {
     // Logging must never break a user action.

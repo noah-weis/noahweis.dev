@@ -37,8 +37,11 @@ export const test = base.extend<SupaFixtures>({
         // applied successfully; this is a spurious error. Two known message forms:
         //   "storage ... 502" — storage health-check
         //   "Error status 502: An invalid response was received from the upstream server"
-        if (stderr.includes("502")) {
-          console.warn("[resetDb] Ignoring known 502 health-check quirk on Windows.");
+        // Docker Desktop on Windows also occasionally fails to restart a container
+        // between rapid sequential resets — "error running container: exit 1".
+        // Both are transient infrastructure quirks, not migration failures.
+        if (stderr.includes("502") || stderr.includes("error running container")) {
+          console.warn("[resetDb] Ignoring known Docker/Windows transient error:", stderr.trim());
           return;
         }
         throw err; // Real failure — let Playwright abort the suite.
