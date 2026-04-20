@@ -4,6 +4,7 @@ import { useSession, useCurrentUserRow } from "../lib/auth";
 import { supabase } from "../lib/supabase";
 import { APPS } from "./registry";
 import { canAccessApp } from "../lib/permissions";
+import { logEvent } from "../lib/logEvent";
 import type { UserAppPermission } from "../lib/types";
 
 export function RequireApp() {
@@ -28,6 +29,7 @@ export function RequireApp() {
     if (sessionLoading || rowLoading || perms === null) return;
     if (!app)                                navigate("/admin/dashboard", { replace: true });
     else if (!canAccessApp(row, perms, app)) navigate("/admin/dashboard", { replace: true });
+    else                                     logEvent("app_opened", {}, app.slug);
   }, [sessionLoading, rowLoading, perms, app, row, navigate]);
 
   if (sessionLoading || rowLoading || perms === null) return <div>Loading…</div>;
