@@ -3210,6 +3210,182 @@ git commit -m "docs: add admin shell production runbook"
 
 ---
 
+## Task 17: CI — run Playwright tests against the local Supabase stack
+
+**Files:**
+- Modify: `.github/workflows/deploy.yml`
+
+The current workflow builds and rsyncs to Dreamhost without running tests. Now that the project has a meaningful test suite that depends on a live Supabase backend, CI should spin up the same local stack we use in development (Postgres + Auth + Edge Functions, all in Docker) and run the Playwright tests against it before the deploy job runs. GitHub-hosted `ubuntu-latest` runners come with Docker pre-installed, so no extra setup is needed for the engine itself — we just install the Supabase CLI and call `supabase start`.
+
+The deploy job becomes dependent on the test job (`needs: test`), so a failing test blocks production.
+
+- [ ] **Step 1: Read the existing workflow**
+
+Read `D:/vibes/noahweis.dev/.github/workflows/deploy.yml` to confirm the current shape (single `build-and-deploy` job that does checkout → setup-node → npm ci → npm run build → SSH → rsync).
+
+- [ ] **Step 2: Replace the workflow with a two-job version (test + build-and-deploy)**
+
+Replace the entire contents of `D:/vibes/noahweis.dev/.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy
+
+on:
+  push:
+    branches: [main, live]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node deps
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase stack (Docker)
+        run: supabase start
+
+      - name: Export Supabase env vars
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "VITE_SUPABASE_URL=$API_URL"
+            echo "VITE_SUPABASE_ANON_KEY=$ANON_KEY"
+          } >> "$GITHUB_ENV"
+
+      - name: Serve request-otp Edge Function in background
+        run: |
+          nohup supabase functions serve request-otp --no-verify-jwt > /tmp/edge.log 2>&1 &
+          # Give it a couple of seconds to boot.
+          for i in 1 2 3 4 5; do
+            if curl -sf -X POST "$VITE_SUPABASE_URL/functions/v1/request-otp" -H "apikey: $VITE_SUPABASE_ANON_KEY" -H "Content-Type: application/json" -d '{}' > /dev/null; then
+              echo "edge function up"; break
+            fi
+            sleep 1
+          done
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Stop Supabase stack
+        if: always()
+        run: supabase stop --no-backup
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          WEBROOT_PATH: ${{ secrets.WEBROOT_PATH }}
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/id_ed25519" \
+            dist/ "$SSH_USER@$SSH_HOST:$WEBROOT_PATH/"
+```
+
+Notes on the workflow design:
+
+- `supabase/setup-cli@v1` is the official action; it installs the CLI on the runner.
+- `supabase start` boots Postgres + Auth + Storage + Inbucket via Docker. On a fresh runner it pulls images (~1–2 min); the `actions/cache` for Docker images can be added later if CI starts feeling slow.
+- `supabase status -o env` exports the API URL + anon key + service role key. We promote them into both bare names (used by tests) and `VITE_*` names (used by the app at dev time).
+- The Edge Function is served in the background with `nohup` because Playwright tests assume it's reachable at `/functions/v1/request-otp`.
+- `build-and-deploy` does not run the tests itself; it trusts the `needs: test` gate.
+
+- [ ] **Step 3: Validate locally**
+
+Before pushing, dry-run the workflow YAML to catch syntax errors:
+
+```bash
+cd D:/vibes/noahweis.dev
+# If `actionlint` is installed:
+actionlint .github/workflows/deploy.yml || echo "actionlint not installed — skipping"
+# As a fallback, just confirm it parses as YAML:
+node -e "console.log(require('js-yaml').load(require('fs').readFileSync('.github/workflows/deploy.yml','utf8')).jobs)" 2>&1 || echo "(js-yaml not installed; skip)"
+```
+
+(Either tool is optional. If neither is available, GitHub will surface YAML errors when the workflow runs.)
+
+- [ ] **Step 4: Commit**
+
+```bash
+cd D:/vibes/noahweis.dev
+git add .github/workflows/deploy.yml
+git commit -m "ci: run Playwright tests against local Supabase stack before deploy"
+```
+
+- [ ] **Step 5: Smoke test on a PR**
+
+Push the branch and open a PR. Watch the `test` job run end-to-end at https://github.com/<owner>/noahweis.dev/actions. Expected:
+
+1. `test` job: passes (all suites green, Supabase started + stopped cleanly).
+2. `build-and-deploy` job: starts only after `test` passes; deploys to Dreamhost as before.
+
+If `test` fails on CI but passes locally, download the Playwright report artifact (`playwright-report` from the failure run) for traces.
+
+---
+
 ## Self-review notes
 
 A scan of the spec sections vs. tasks:
@@ -3227,5 +3403,6 @@ A scan of the spec sections vs. tasks:
 - **Error handling (spec § Error handling)** → Login error states (Tasks 6–7), `logEvent` swallow (Task 11), session-refresh redirect (Task 8). RLS denial toast is not explicitly implemented as a global toast — left as graceful degradation since it represents a guard bug rather than a normal flow.
 - **Testing** → Tests live alongside each implementation task, plus DB tests in Tasks 2–3.
 - **Deployment** → Task 16.
+- **CI / Docker in GitHub Actions** → Task 17.
 
 No spec section is uncovered.
