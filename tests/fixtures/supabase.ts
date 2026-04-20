@@ -32,16 +32,18 @@ export const test = base.extend<SupaFixtures>({
         execSync("supabase db reset --no-seed", { stdio: ["ignore", "inherit", "pipe"] });
       } catch (err: unknown) {
         const stderr = (err as { stderr?: Buffer }).stderr?.toString() ?? "";
-        // Supabase CLI v2.90 + Docker Desktop on Windows emits a 502 from the
-        // storage health check after container restart. The migration itself
-        // applied successfully; this is a spurious error. Two known message forms:
-        //   "storage ... 502" — storage health-check
-        //   "Error status 502: An invalid response was received from the upstream server"
-        // Docker Desktop on Windows also occasionally fails to restart a container
-        // between rapid sequential resets — "error running container: exit 1".
-        // Both are transient infrastructure quirks, not migration failures.
-        if (stderr.includes("502") || stderr.includes("error running container")) {
-          console.warn("[resetDb] Ignoring known Docker/Windows transient error:", stderr.trim());
+        // Known transient Docker errors that don't indicate a migration failure:
+        //   "502" — storage health-check (Windows Docker Desktop, Supabase CLI v2.90)
+        //   "error running container" — container restart race (Windows Docker Desktop)
+        //   "already in progress" — concurrent reset collision (Linux CI, parallel workers)
+        //   "unexpected EOF" — DB socket closed mid-reset (Linux CI, parallel workers)
+        if (
+          stderr.includes("502") ||
+          stderr.includes("error running container") ||
+          stderr.includes("already in progress") ||
+          stderr.includes("unexpected EOF")
+        ) {
+          console.warn("[resetDb] Ignoring known Docker transient error:", stderr.trim());
           return;
         }
         throw err; // Real failure — let Playwright abort the suite.

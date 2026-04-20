@@ -58,7 +58,9 @@ jobs:
           done
 
       - name: Run Playwright tests
-        run: npx playwright test
+        # Run desktop project only with a single worker to prevent concurrent
+        # `supabase db reset` calls from colliding inside Docker on the CI runner.
+        run: npx playwright test --project=desktop --workers=1
 
       - name: Upload Playwright report on failure
         if: failure()
