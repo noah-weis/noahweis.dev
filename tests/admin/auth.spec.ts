@@ -27,3 +27,46 @@ test("login: invalid email shape shows inline error and stays on email step", as
   await expect(page.getByTestId("login-error")).toContainText("valid email");
   await expect(page.getByTestId("login-code-input")).not.toBeVisible();
 });
+
+test("login: correct OTP signs in and redirects to dashboard", async ({ page, service }) => {
+  // Generate the OTP server-side so we don't need an email inbox.
+  // Stub the edge-function call so it doesn't overwrite the generated OTP.
+  await page.route("**/functions/v1/request-otp", route => route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) }));
+  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "admin@example.com" });
+  const otp = link!.properties.email_otp!;
+
+  await page.goto("http://localhost:5173/admin");
+  await page.getByTestId("login-email-input").fill("admin@example.com");
+  await page.getByTestId("login-send-code").click();
+  await page.getByTestId("login-code-input").fill(otp);
+  await page.getByTestId("login-verify").click();
+  await page.waitForURL("**/admin/dashboard");
+  await expect(page.getByTestId("dashboard-root")).toBeVisible();
+});
+
+test("login: wrong OTP shows error and stays on code step", async ({ page }) => {
+  await page.goto("http://localhost:5173/admin");
+  await page.getByTestId("login-email-input").fill("admin@example.com");
+  await page.getByTestId("login-send-code").click();
+  await page.getByTestId("login-code-input").fill("000000");
+  await page.getByTestId("login-verify").click();
+  await expect(page.getByTestId("login-error")).toContainText("didn't work");
+  await expect(page).toHaveURL(/\/admin$/);
+});
+
+test("login: signed-in user visiting /admin is bounced to /admin/dashboard", async ({ page, service }) => {
+  // Stub the edge-function call so it doesn't overwrite the generated OTP.
+  await page.route("**/functions/v1/request-otp", route => route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) }));
+  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "admin@example.com" });
+  const otp = link!.properties.email_otp!;
+  await page.goto("http://localhost:5173/admin");
+  await page.getByTestId("login-email-input").fill("admin@example.com");
+  await page.getByTestId("login-send-code").click();
+  await page.getByTestId("login-code-input").fill(otp);
+  await page.getByTestId("login-verify").click();
+  await page.waitForURL("**/admin/dashboard");
+
+  // Reload /admin — should be bounced back to /admin/dashboard.
+  await page.goto("http://localhost:5173/admin");
+  await page.waitForURL("**/admin/dashboard");
+});

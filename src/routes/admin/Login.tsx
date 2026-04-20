@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
+import { useSession } from "../../lib/auth";
 import s from "../../styles/login.module.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Login() {
+  const navigate = useNavigate();
+  const { session, loading } = useSession();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!loading && session) navigate("/admin/dashboard", { replace: true });
+  }, [loading, session, navigate]);
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -37,8 +46,31 @@ export function Login() {
     }
   }
 
-  async function verify(_e: React.FormEvent) {
-    // Implemented in Task 7.
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      const { data, error: vErr } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "email",
+      });
+      if (vErr || !data.session) {
+        setError("That code didn't work. Try again or restart.");
+        return;
+      }
+      // Write the signed_in event. The trigger will bump last_sign_in_at on allowed_emails.
+      await supabase.from("events").insert({
+        email,
+        app_slug: null,
+        event_name: "signed_in",
+        payload: {},
+      });
+      navigate("/admin/dashboard", { replace: true });
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -59,7 +91,7 @@ export function Login() {
               autoFocus
             />
             <button data-testid="login-send-code" className={s.button} type="submit" disabled={busy}>
-              {busy ? "Sending\u2026" : "Send code"}
+              {busy ? "Sending…" : "Send code"}
             </button>
             {error && <div data-testid="login-error" className={s.error}>{error}</div>}
           </form>
@@ -80,8 +112,10 @@ export function Login() {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               autoFocus
             />
-            <button className={s.button} type="submit" disabled>Verify</button>
-            <p className={s.status}>(Verify is wired up in the next step.)</p>
+            <button data-testid="login-verify" className={s.button} type="submit" disabled={busy || code.length !== 6}>
+              {busy ? "Verifying…" : "Verify"}
+            </button>
+            {error && <div data-testid="login-error" className={s.error}>{error}</div>}
           </form>
         )}
       </div>

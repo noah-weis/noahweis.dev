@@ -34,9 +34,11 @@ export const test = base.extend<SupaFixtures>({
         const stderr = (err as { stderr?: Buffer }).stderr?.toString() ?? "";
         // Supabase CLI v2.90 + Docker Desktop on Windows emits a 502 from the
         // storage health check after container restart. The migration itself
-        // applied successfully; this is a spurious error.
-        if (stderr.includes("storage") && stderr.includes("502")) {
-          console.warn("[resetDb] Ignoring known storage-502 health-check quirk on Windows.");
+        // applied successfully; this is a spurious error. Two known message forms:
+        //   "storage ... 502" — storage health-check
+        //   "Error status 502: An invalid response was received from the upstream server"
+        if (stderr.includes("502")) {
+          console.warn("[resetDb] Ignoring known 502 health-check quirk on Windows.");
           return;
         }
         throw err; // Real failure — let Playwright abort the suite.
