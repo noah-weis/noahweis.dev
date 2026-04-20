@@ -34,3 +34,9 @@ desktop.ini
 
 # Local-only helper scripts (contain host-specific values)
 /scripts/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+supabase/functions/_shared/
+.env.local
