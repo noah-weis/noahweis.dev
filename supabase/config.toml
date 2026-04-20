@@ -234,7 +234,7 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 [auth.email.template.magic_link]
-subject = "Your noahweis.dev login code"
+subject = "{{ .Token }} — noahweis.dev login code"
 content_path = "./supabase/templates/magic_link.html"
 
 # [auth.email.template.invite]
