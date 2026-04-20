@@ -235,7 +235,7 @@ otp_expiry = 3600
 
 [auth.email.template.magic_link]
 subject = "Your noahweis.dev login code"
-content_path = "./templates/magic_link.html"
+content_path = "./supabase/templates/magic_link.html"
 
 # [auth.email.template.invite]
 # subject = "You have been invited"
