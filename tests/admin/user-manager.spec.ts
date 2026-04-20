@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/supabase";
+import { test, expect, signInAs } from "../fixtures/supabase";
 
 test.beforeAll(async ({ resetDb, service }) => {
   test.setTimeout(120_000);
@@ -11,20 +11,8 @@ test.beforeAll(async ({ resetDb, service }) => {
   ]);
 });
 
-async function signInDirect(page: any, service: any, email: string) {
-  const { data: link } = await service.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-    options: { redirectTo: "http://localhost:5173/admin/dashboard" },
-  });
-  await page.goto(link!.properties.action_link);
-  await page.waitForURL(/localhost:5173/);
-  await page.goto("http://localhost:5173/admin/dashboard");
-  await page.waitForSelector('[data-testid="dashboard-root"]', { timeout: 10_000 });
-}
-
 test("user manager lists existing rows", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await expect(page.getByTestId("um-row-admin@example.com")).toBeVisible();
   await expect(page.getByTestId("um-row-user@example.com")).toBeVisible();
@@ -32,7 +20,7 @@ test("user manager lists existing rows", async ({ page, service }) => {
 });
 
 test("admin can add a new user", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.getByTestId("um-add-email").fill("new@example.com");
   await page.getByTestId("um-add-label").fill("Newcomer");
@@ -46,7 +34,7 @@ test("admin can add a new user", async ({ page, service }) => {
 });
 
 test("adding an existing email shows an error and doesn't duplicate", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.getByTestId("um-add-email").fill("user@example.com");
   await page.getByTestId("um-add-submit").click();
@@ -54,7 +42,7 @@ test("adding an existing email shows an error and doesn't duplicate", async ({ p
 });
 
 test("admin can toggle enabled", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.getByTestId("um-row-user@example.com").getByTestId("um-toggle-enabled").click();
   await page.waitForTimeout(300);
@@ -63,7 +51,7 @@ test("admin can toggle enabled", async ({ page, service }) => {
 });
 
 test("admin can edit a label inline", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.getByTestId("um-row-user@example.com").getByTestId("um-edit-label").click();
   const input = page.getByTestId("um-row-user@example.com").getByTestId("um-edit-label-input");
@@ -74,7 +62,7 @@ test("admin can edit a label inline", async ({ page, service }) => {
 
 // Grant perm before remove — remove (below) cascades to delete permissions too.
 test("admin can grant per-app permission to a non-admin", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.getByTestId("um-row-user@example.com").getByTestId("um-perms-toggle").click();
   await page.getByTestId("um-perms-checkbox-users").check();
@@ -87,7 +75,7 @@ test("admin can grant per-app permission to a non-admin", async ({ page, service
 
 // Remove last — it cascades and removes the permission granted above.
 test("admin can remove a user (with confirm)", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   page.once("dialog", (d: any) => d.accept());
   await page.getByTestId("um-row-user@example.com").getByTestId("um-remove").click();

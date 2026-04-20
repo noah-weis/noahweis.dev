@@ -1,4 +1,4 @@
-import { test as base, expect } from "@playwright/test";
+import { test as base, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { execSync } from "node:child_process";
 
@@ -11,6 +11,24 @@ if (!SERVICE_KEY || !ANON_KEY) {
     "Set SUPABASE_SERVICE_ROLE_KEY and SUPABASE_ANON_KEY env vars before running tests. " +
     "Both are printed by `supabase start`.",
   );
+}
+
+// Sign a user in via the dev-only /__test/auth-helpers harness, which calls
+// verifyOtp directly. Navigating to the magic-link action_link doesn't work
+// because src/lib/supabase.ts sets `detectSessionInUrl: false`.
+export async function signInAs(page: Page, service: SupabaseClient, email: string): Promise<void> {
+  const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email });
+  const otp = link!.properties.email_otp!;
+  await page.goto("http://localhost:5173/__test/auth-helpers");
+  await page.getByTestId("email-input").fill(email);
+  await page.getByTestId("otp-input").fill(otp);
+  await page.getByTestId("sign-in").click();
+  await page.waitForFunction(
+    (expected) => document.querySelector('[data-testid="session-state"]')?.textContent === expected,
+    email,
+  );
+  await page.goto("http://localhost:5173/admin/dashboard");
+  await page.waitForSelector('[data-testid="dashboard-root"]', { timeout: 10_000 });
 }
 
 export type SupaFixtures = {

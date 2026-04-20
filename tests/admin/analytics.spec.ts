@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/supabase";
+import { test, expect, signInAs } from "../fixtures/supabase";
 
 test.beforeAll(async ({ resetDb, service }) => {
   test.setTimeout(120_000);
@@ -14,20 +14,8 @@ test.beforeAll(async ({ resetDb, service }) => {
   ]);
 });
 
-async function signInDirect(page: any, service: any, email: string) {
-  const { data: link } = await service.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-    options: { redirectTo: "http://localhost:5173/admin/dashboard" },
-  });
-  await page.goto(link!.properties.action_link);
-  await page.waitForURL(/localhost:5173/);
-  await page.goto("http://localhost:5173/admin/dashboard");
-  await page.waitForSelector('[data-testid="dashboard-root"]', { timeout: 10_000 });
-}
-
 test("analytics summary shows totals from seed", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/analytics");
   await expect(page.getByTestId("analytics-total-events")).toContainText(/\d+/);
   const total = await page.getByTestId("analytics-total-events").textContent();
@@ -37,7 +25,7 @@ test("analytics summary shows totals from seed", async ({ page, service }) => {
 });
 
 test("filtering by event name narrows the totals", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/analytics");
   await expect(page.getByTestId("analytics-total-events")).toContainText(/\d+/);
   const before = parseInt((await page.getByTestId("analytics-total-events").textContent()) ?? "0", 10);
@@ -51,7 +39,7 @@ test("filtering by event name narrows the totals", async ({ page, service }) => 
 });
 
 test("event table lists rows and expands payload on click", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/analytics");
   await expect(page.getByTestId("analytics-event-row").first()).toBeVisible();
   const expandBtn = page.getByTestId("analytics-expand-payload").first();
@@ -61,7 +49,7 @@ test("event table lists rows and expands payload on click", async ({ page, servi
 });
 
 test("sparkline renders an svg with bars", async ({ page, service }) => {
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/analytics");
   await expect(page.getByTestId("analytics-sparkline")).toBeVisible();
   const bars = await page.getByTestId("analytics-sparkline").locator("rect").count();
@@ -78,7 +66,7 @@ test("pagination shows next page", async ({ page, service }) => {
   }));
   await service.from("events").insert(big);
 
-  await signInDirect(page, service, "admin@example.com");
+  await signInAs(page, service, "admin@example.com");
   await page.goto("http://localhost:5173/admin/apps/analytics");
   await expect(page.getByTestId("analytics-pagination-info")).toContainText("Page 1");
   await page.getByTestId("analytics-pagination-next").click();
