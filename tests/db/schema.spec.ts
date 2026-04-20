@@ -34,3 +34,50 @@ test.describe.serial("schema", () => {
     expect(after.data?.last_sign_in_at).not.toBeNull();
   });
 });
+
+test.describe.serial("rls", () => {
+  test.beforeAll(({ resetDb, service }) => {
+    resetDb();
+    return service.from("allowed_emails").insert([
+      { email: "admin@example.com", is_admin: true,  enabled: true },
+      { email: "user@example.com",  is_admin: false, enabled: true },
+    ]);
+  });
+
+  test("anon role cannot read allowed_emails", async ({ anon }) => {
+    const { data } = await anon.from("allowed_emails").select("*");
+    expect(data ?? []).toEqual([]);
+  });
+
+  test("anon role cannot insert events", async ({ anon }) => {
+    const { error } = await anon.from("events").insert({ email: null, event_name: "x", payload: {} });
+    expect(error).not.toBeNull();
+  });
+
+  test("non-admin signed-in user sees only their own allowed_emails row", async ({ anon, service }) => {
+    const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "user@example.com" });
+    const otp = link!.properties.email_otp!;
+    await anon.auth.verifyOtp({ email: "user@example.com", token: otp, type: "email" });
+    const { data } = await anon.from("allowed_emails").select("email");
+    expect(data).toEqual([{ email: "user@example.com" }]);
+    await anon.auth.signOut();
+  });
+
+  test("non-admin cannot insert into allowed_emails", async ({ anon, service }) => {
+    const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "user@example.com" });
+    const otp = link!.properties.email_otp!;
+    await anon.auth.verifyOtp({ email: "user@example.com", token: otp, type: "email" });
+    const { error } = await anon.from("allowed_emails").insert({ email: "evil@example.com", is_admin: true, enabled: true });
+    expect(error).not.toBeNull();
+    await anon.auth.signOut();
+  });
+
+  test("authenticated user can insert their own events", async ({ anon, service }) => {
+    const { data: link } = await service.auth.admin.generateLink({ type: "magiclink", email: "user@example.com" });
+    const otp = link!.properties.email_otp!;
+    await anon.auth.verifyOtp({ email: "user@example.com", token: otp, type: "email" });
+    const { error } = await anon.from("events").insert({ email: "user@example.com", event_name: "test", payload: {} });
+    expect(error).toBeNull();
+    await anon.auth.signOut();
+  });
+});
