@@ -39,4 +39,5 @@ desktop.ini
 supabase/.temp/
 supabase/.branches/
 supabase/functions/_shared/
+supabase/functions/.env
 .env.local
