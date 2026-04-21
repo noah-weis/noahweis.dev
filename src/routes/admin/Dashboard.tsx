@@ -5,6 +5,7 @@ import { APPS } from "../../apps/registry";
 import { AppCard } from "../../apps/AppCard";
 import { canAccessApp } from "../../lib/permissions";
 import type { UserAppPermission } from "../../lib/types";
+import s from "../../styles/admin.module.css";
 
 export function Dashboard() {
   const { session } = useSession();
@@ -24,13 +25,13 @@ export function Dashboard() {
 
   return (
     <div data-testid="dashboard-root">
-      <h1 style={{ marginTop: 0 }}>Dashboard</h1>
+      <h1 className={s.pageTitle}>Dashboard</h1>
       {visible.length === 0 ? (
-        <div data-testid="dashboard-empty" style={{ color: "#a1a1aa" }}>
+        <div data-testid="dashboard-empty" className={s.emptyState}>
           You don't have access to any apps yet. Ask the admin to grant you permissions.
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+        <div className={s.cardGrid}>
           {visible.map((app) => <AppCard key={app.slug} app={app} />)}
         </div>
       )}

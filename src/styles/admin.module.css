@@ -1,29 +1,318 @@
 .shell {
   min-height: 100vh;
-  background: #0e0e10;
-  color: #f5f5f7;
-  font-family: system-ui, sans-serif;
+  width: 100%;
+  background: var(--background-color, #1c351c);
+  color: var(--text-color, #eaf5fc);
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
+
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
-  background: #18181b;
-  border-bottom: 1px solid #27272a;
+  padding: 18px 32px;
+  border-bottom: 1px solid rgba(234, 245, 252, 0.15);
 }
-.brand { font-weight: 600; }
-.topbarRight { display: flex; gap: 16px; align-items: center; font-size: 14px; }
-.email { color: #a1a1aa; }
+
+.brand {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--red-color, #c6d89a) !important;
+  text-decoration: none !important;
+}
+
+.brand:hover {
+  color: var(--text-color, #eaf5fc) !important;
+  text-decoration: none !important;
+}
+
+.topbarRight {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.email {
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.7;
+}
+
 .signoutBtn {
   background: transparent;
-  border: 1px solid #3f3f46;
-  border-radius: 6px;
-  color: inherit;
-  padding: 6px 12px;
-  font-size: 13px;
+  border: 2px solid var(--text-color, #eaf5fc);
+  border-radius: 4px;
+  color: var(--text-color, #eaf5fc);
+  padding: 6px 14px;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signoutBtn:hover {
+  background: var(--text-color, #eaf5fc);
+  color: var(--background-color, #1c351c);
+}
+
+.content {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.loadingScreen {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--background-color, #1c351c);
+  color: var(--text-color, #eaf5fc);
+  font-family: "SF Pro Display", sans-serif;
+  opacity: 0.7;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 24px;
+  padding-bottom: 10px;
+  color: var(--red-color, #c6d89a);
+  border-bottom: 1px solid var(--text-color, #eaf5fc);
+  opacity: 0.85;
+}
+
+.input {
+  padding: 10px 12px;
+  background: rgba(234, 245, 252, 0.05);
+  border: 1px solid rgba(234, 245, 252, 0.3);
+  border-radius: 4px;
+  color: var(--text-color, #eaf5fc);
+  font-size: 0.95rem;
+  font-family: "SF Pro Display", sans-serif;
+  box-sizing: border-box;
+}
+.input::placeholder { color: rgba(234, 245, 252, 0.35); }
+.input:focus { outline: none; border-color: var(--red-color, #c6d89a); }
+
+.select {
+  padding: 10px 12px;
+  background: rgba(234, 245, 252, 0.05);
+  border: 1px solid rgba(234, 245, 252, 0.3);
+  border-radius: 4px;
+  color: var(--text-color, #eaf5fc);
+  font-size: 0.95rem;
+  font-family: "SF Pro Display", sans-serif;
   cursor: pointer;
 }
-.signoutBtn:hover { border-color: #818cf8; }
-.content { padding: 32px; max-width: 1200px; margin: 0 auto; }
-.loadingScreen { min-height: 100vh; display: grid; place-items: center; color: #a1a1aa; }
+.select:focus { outline: none; border-color: var(--red-color, #c6d89a); }
+
+.button {
+  padding: 10px 20px;
+  background: transparent;
+  border: 2px solid var(--text-color, #eaf5fc);
+  border-radius: 4px;
+  color: var(--text-color, #eaf5fc);
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.button:hover:not(:disabled) {
+  background: var(--text-color, #eaf5fc);
+  color: var(--background-color, #1c351c);
+}
+.button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.linkButton {
+  background: transparent;
+  border: 0;
+  color: var(--link-color, #84c2e2);
+  cursor: pointer;
+  padding: 0;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 0.85rem;
+}
+.linkButton:hover { color: var(--red-color, #c6d89a); text-decoration: underline; }
+.linkButton:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: none; }
+
+.dangerButton {
+  background: transparent;
+  border: 0;
+  color: #f87171;
+  cursor: pointer;
+  padding: 0;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 0.85rem;
+}
+.dangerButton:hover { text-decoration: underline; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(234, 245, 252, 0.15);
+  text-align: left;
+  vertical-align: top;
+}
+.table th {
+  color: var(--red-color, #c6d89a);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.appCard {
+  display: block;
+  padding: 20px;
+  background: transparent;
+  border: 1px solid rgba(234, 245, 252, 0.25);
+  border-radius: 6px;
+  color: var(--text-color, #eaf5fc) !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+}
+.appCard:hover {
+  border-color: var(--red-color, #c6d89a);
+  text-decoration: none !important;
+}
+.appCardName {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 6px;
+  color: var(--red-color, #c6d89a);
+}
+.appCardDesc {
+  margin: 0;
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.emptyState {
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.6;
+  padding: 24px 0;
+  font-size: 1rem;
+}
+
+.statRow {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.stat {
+  padding: 16px 20px;
+  background: transparent;
+  border: 1px solid rgba(234, 245, 252, 0.2);
+  border-radius: 6px;
+  min-width: 160px;
+}
+.statLabel {
+  font-size: 0.7rem;
+  color: var(--red-color, #c6d89a);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.addForm {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.popover {
+  background: rgba(234, 245, 252, 0.05);
+  border: 1px solid rgba(234, 245, 252, 0.25);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+}
+.popoverRow {
+  display: block;
+  padding: 4px 0;
+  font-size: 0.9rem;
+}
+.popoverSlug {
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.5;
+}
+
+.sparklineWrap { margin-top: 24px; }
+.sparklineLabel {
+  font-size: 0.7rem;
+  color: var(--red-color, #c6d89a);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.muted {
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.5;
+}
+
+.payloadJson {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.75;
+  font-family: "SF Mono", Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.paginationRow {
+  margin-top: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.paginationInfo {
+  color: var(--text-color, #eaf5fc);
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.errorMsg {
+  color: #f87171;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.labelCell {
+  cursor: pointer;
+}
+
+.checkbox {
+  accent-color: var(--red-color, #c6d89a);
+  margin-right: 6px;
+}

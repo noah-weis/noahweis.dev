@@ -7,9 +7,14 @@ test.beforeAll(async ({ resetDb, service }) => {
     { email: "admin@example.com", is_admin: true,  enabled: true },
     { email: "user@example.com",  is_admin: false, enabled: true },
   ]);
+  // A few extra signed_in events so `filter by event name` deterministically narrows
+  // even if RequireApp logs its own `app_opened` event between the pre- and post-
+  // filter reads.
   await service.from("events").insert([
     { email: "admin@example.com", app_slug: "users",     event_name: "app_opened", payload: { ctx: "dashboard" } },
     { email: "admin@example.com", app_slug: "analytics", event_name: "app_opened", payload: {} },
+    { email: "user@example.com",  app_slug: null,        event_name: "signed_in",  payload: {} },
+    { email: "admin@example.com", app_slug: null,        event_name: "signed_in",  payload: {} },
     { email: "user@example.com",  app_slug: null,        event_name: "signed_in",  payload: {} },
   ]);
 });

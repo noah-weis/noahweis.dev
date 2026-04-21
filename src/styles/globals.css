@@ -27,6 +27,11 @@ html, body {
   overflow-x: hidden;
 }
 
+#root {
+  width: 100%;
+  flex: 1;
+}
+
 body {
   font-family: "SF Pro Display", sans-serif;
   font-size: 30px;
