@@ -1,7 +1,10 @@
 import { test, expect } from "../fixtures/supabase";
 
 test.describe.serial("schema", () => {
-  test.beforeAll(({ resetDb }) => resetDb());
+  test.beforeAll(({ resetDb }) => {
+    test.setTimeout(120_000);
+    return resetDb();
+  });
 
   test("allowed_emails table exists with expected columns", async ({ service }) => {
     const { error } = await service.from("allowed_emails").select("email, label, is_admin, enabled, created_at, last_sign_in_at").limit(1);
@@ -36,12 +39,14 @@ test.describe.serial("schema", () => {
 });
 
 test.describe.serial("rls", () => {
-  test.beforeAll(({ resetDb, service }) => {
+  test.beforeAll(async ({ resetDb, service }) => {
+    test.setTimeout(120_000);
     resetDb();
-    return service.from("allowed_emails").insert([
+    const { error } = await service.from("allowed_emails").insert([
       { email: "admin@example.com", is_admin: true,  enabled: true },
       { email: "user@example.com",  is_admin: false, enabled: true },
     ]);
+    if (error) throw error;
   });
 
   test("anon role cannot read allowed_emails", async ({ anon }) => {
