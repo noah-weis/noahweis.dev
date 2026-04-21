@@ -7,7 +7,12 @@ export function canAccessApp(
   app: AppDef,
 ): boolean {
   if (!user || !user.enabled) return false;
-  if (user.is_admin) return true;
-  if (app.adminOnly) return false;
-  return perms.some((p) => p.app_slug === app.slug);
+  switch (app.accessMode) {
+    case "admin":
+      return user.is_admin;
+    case "allowlist":
+      return true;
+    case "grant":
+      return user.is_admin || perms.some((p) => p.app_slug === app.slug);
+  }
 }

@@ -16,7 +16,7 @@ export default function App() {
         <Route path="/admin" element={<Login />} />
         <Route element={<AdminRoot />}>
           <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/apps/:slug" element={<RequireApp />} />
+          <Route path="/admin/apps/:slug/*" element={<RequireApp />} />
           <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
         {import.meta.env.DEV && (

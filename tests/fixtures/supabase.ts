@@ -55,11 +55,14 @@ export const test = base.extend<SupaFixtures>({
         //   "error running container" — container restart race (Windows Docker Desktop)
         //   "already in progress" — concurrent reset collision (Linux CI, parallel workers)
         //   "unexpected EOF" — DB socket closed mid-reset (Linux CI, parallel workers)
+        //   "context deadline exceeded" — Storage service slow to come back up
+        //     after db reset (migrations already applied successfully)
         if (
           stderr.includes("502") ||
           stderr.includes("error running container") ||
           stderr.includes("already in progress") ||
-          stderr.includes("unexpected EOF")
+          stderr.includes("unexpected EOF") ||
+          stderr.includes("context deadline exceeded")
         ) {
           console.warn("[resetDb] Ignoring known Docker transient error:", stderr.trim());
           return;

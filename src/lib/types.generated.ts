@@ -119,12 +119,285 @@ export type Database = {
           },
         ]
       }
+      zap_receipt_item_members: {
+        Row: {
+          email: string
+          item_id: string
+        }
+        Insert: {
+          email: string
+          item_id: string
+        }
+        Update: {
+          email?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_receipt_item_members_email_fkey"
+            columns: ["email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_receipt_item_members_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "zap_receipt_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zap_receipt_items: {
+        Row: {
+          amount_cents: number
+          description: string
+          id: string
+          position: number
+          receipt_id: string
+        }
+        Insert: {
+          amount_cents: number
+          description?: string
+          id?: string
+          position: number
+          receipt_id: string
+        }
+        Update: {
+          amount_cents?: number
+          description?: string
+          id?: string
+          position?: number
+          receipt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_receipt_items_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "zap_receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zap_receipt_members: {
+        Row: {
+          email: string
+          receipt_id: string
+        }
+        Insert: {
+          email: string
+          receipt_id: string
+        }
+        Update: {
+          email?: string
+          receipt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_receipt_members_email_fkey"
+            columns: ["email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_receipt_members_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "zap_receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zap_receipts: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          payer_email: string
+          receipt_date: string
+          split_mode: string
+          storage_path: string
+          total_cents: number
+          trip_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string
+          payer_email: string
+          receipt_date?: string
+          split_mode: string
+          storage_path: string
+          total_cents: number
+          trip_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          payer_email?: string
+          receipt_date?: string
+          split_mode?: string
+          storage_path?: string
+          total_cents?: number
+          trip_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_receipts_payer_email_fkey"
+            columns: ["payer_email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_receipts_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "zap_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zap_receipts_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+        ]
+      }
+      zap_settlements: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          from_email: string
+          id: string
+          paid_at: string
+          to_email: string
+          trip_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          from_email: string
+          id?: string
+          paid_at?: string
+          to_email: string
+          trip_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          from_email?: string
+          id?: string
+          paid_at?: string
+          to_email?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_settlements_from_email_fkey"
+            columns: ["from_email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_settlements_to_email_fkey"
+            columns: ["to_email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_settlements_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "zap_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zap_trip_members: {
+        Row: {
+          email: string
+          joined_at: string
+          trip_id: string
+        }
+        Insert: {
+          email: string
+          joined_at?: string
+          trip_id: string
+        }
+        Update: {
+          email?: string
+          joined_at?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_trip_members_email_fkey"
+            columns: ["email"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+          {
+            foreignKeyName: "zap_trip_members_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "zap_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zap_trips: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zap_trips_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "allowed_emails"
+            referencedColumns: ["email"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      auth_email: { Args: never; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
+      is_enabled_allowed_email: { Args: { p_email: string }; Returns: boolean }
+      is_zap_trip_member: { Args: { p_trip_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

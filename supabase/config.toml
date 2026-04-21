@@ -118,6 +118,9 @@ file_size_limit = "50MiB"
 # allowed_mime_types = ["image/png", "image/jpeg"]
 # objects_path = "./images"
 
+# zap-receipts bucket is created via supabase/migrations/0003_zap.sql so it
+# survives db resets without depending on the Storage service being healthy.
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true

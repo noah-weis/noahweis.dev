@@ -11,15 +11,16 @@ test.beforeAll(async ({ resetDb, service }) => {
   ]);
 });
 
-test("admin sees both built-in apps as cards", async ({ page, service }) => {
+test("admin sees all apps as cards", async ({ page, service }) => {
   await signInAs(page, service, "admin@example.com");
   await expect(page.getByTestId("app-card-users")).toBeVisible();
   await expect(page.getByTestId("app-card-analytics")).toBeVisible();
+  await expect(page.getByTestId("app-card-zap")).toBeVisible();
 });
 
-test("non-admin with no permissions sees no cards and an empty state message", async ({ page, service }) => {
+test("non-admin sees only allowlist apps (ZAP), not admin-only apps", async ({ page, service }) => {
   await signInAs(page, service, "user@example.com");
-  await expect(page.getByTestId("dashboard-empty")).toBeVisible();
+  await expect(page.getByTestId("app-card-zap")).toBeVisible();
   await expect(page.getByTestId("app-card-users")).not.toBeVisible();
   await expect(page.getByTestId("app-card-analytics")).not.toBeVisible();
 });
@@ -35,7 +36,9 @@ test("non-admin navigating directly to /admin/apps/users is bounced to dashboard
   await signInAs(page, service, "user@example.com");
   await page.goto("http://localhost:5173/admin/apps/users");
   await page.waitForURL("**/admin/dashboard");
-  await expect(page.getByTestId("dashboard-empty")).toBeVisible();
+  // Non-admin sees ZAP but not the admin-only User Manager card.
+  await expect(page.getByTestId("app-card-zap")).toBeVisible();
+  await expect(page.getByTestId("app-card-users")).not.toBeVisible();
 });
 
 test("unknown app slug bounces to dashboard", async ({ page, service }) => {
